@@ -1,0 +1,269 @@
+/* premiumAppointmentController.css */
+.premium-appointment-container {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: 12px;
+}
+
+.premium-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.premium-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    --slds-c-icon-color-foreground-default: rgba(255, 255, 255, 0.9);
+}
+
+.header-text {
+    flex: 1;
+}
+
+.card-title {
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin: 0.5rem 0 0 0;
+    font-weight: 300;
+}
+
+.card-body {
+    background: white;
+    padding: 2rem;
+}
+
+.toggles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.toggle-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 2px solid #f1f5f9;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.toggle-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    transition: all 0.3s ease;
+}
+
+.bu-card::before {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.territory-card::before {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.account-card::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.channel-card::before {
+    background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+}
+
+.toggle-card:hover {
+    border-color: #e2e8f0;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.toggle-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.toggle-icon {
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.bu-icon {
+    background: rgba(59, 130, 246, 0.1);
+    --slds-c-icon-color-foreground-default: #3b82f6;
+}
+
+.territory-icon {
+    background: rgba(16, 185, 129, 0.1);
+    --slds-c-icon-color-foreground-default: #10b981;
+}
+
+.account-icon {
+    background: rgba(245, 158, 11, 0.1);
+    --slds-c-icon-color-foreground-default: #f59e0b;
+}
+
+.channel-icon {
+    background: rgba(139, 92, 246, 0.1);
+    --slds-c-icon-color-foreground-default: #8b5cf6;
+}
+
+.toggle-text {
+    flex: 1;
+}
+
+.toggle-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.toggle-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0 0;
+}
+
+.toggle-switch-container {
+    margin-left: 1rem;
+}
+
+.custom-toggle {
+    --slds-c-checkbox-toggle-color-background-checked: #059669;
+    --slds-c-checkbox-toggle-sizing-height: 2rem;
+    --slds-c-checkbox-toggle-sizing-width: 3.5rem;
+}
+
+.toggle-status {
+    display: flex;
+    justify-content: center;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.375rem 1rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.status-badge.enabled {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.disabled {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .toggles-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .toggle-card {
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .toggle-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .toggle-switch-container {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+}
+
+/* Animation for status changes */
+.status-badge {
+    animation: statusPulse 0.3s ease-in-out;
+}
+
+@keyframes statusPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Custom focus states */
+.custom-toggle:focus-within {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    border-radius: 20px;
+}
