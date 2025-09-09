@@ -4,6 +4,9 @@
 
 Two Lightning Web Components backed by Apex controllers and two lightweight custom objects that let you manage premium appointments and dynamic pricing feature flags per scope (Business Unit, Territory, Account, Channel).
 
+<img width="3290" height="1594" alt="image" src="https://github.com/user-attachments/assets/5194b966-614f-401e-ae29-7a1016ecd6d9" />
+
+
 ## Components
 
 ### 1. Premium Appointment Controller
@@ -136,6 +139,7 @@ Both components dispatch `togglechange` events when toggles are modified:
 - `updateDynamicPricingSetting(String settingType, Boolean isEnabled)`
 - `getDynamicPricingSettings()` - Returns Map<String, Boolean>
 - `isDynamicPricingEnabled(String settingType)`
+
 - `getDynamicPriceMultiplier(String settingType, String recordId)`
 - `bulkUpdateDynamicPricingSettings(Map<String, Boolean> settingsMap)`
 
