@@ -194,8 +194,5 @@ public with sharing class DynamicPricingController {
     }
 
     // Legacy method - kept for compatibility
-    @AuraEnabled(cacheable=true)
-    public static List<Dynamic_Pricing_Setting__c> getDynamicPricingSettings() {
-        return [SELECT Id, Name FROM Dynamic_Pricing_Setting__c LIMIT 10];
-    }
+    // Legacy method removed to avoid duplicate signature
 }

@@ -5,12 +5,12 @@
     <targets>
         <target>lightning__AppPage</target>
         <target>lightning__HomePage</target>
-        <target>lightning__TabPage</target>
+        <target>lightning__Tab</target>
         <target>lightning__RecordPage</target>
         <target>lightningCommunity__Page</target>
     </targets>
     <targetConfigs>
-        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__TabPage">
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__RecordPage">
             <property name="buEnabled" type="Boolean" default="false" label="Business Unit Enabled" description="Initial state for Business Unit dynamic pricing"/>
             <property name="territoryEnabled" type="Boolean" default="false" label="Territory Enabled" description="Initial state for Territory dynamic pricing"/>
             <property name="accountEnabled" type="Boolean" default="false" label="Account Enabled" description="Initial state for Account dynamic pricing"/>
