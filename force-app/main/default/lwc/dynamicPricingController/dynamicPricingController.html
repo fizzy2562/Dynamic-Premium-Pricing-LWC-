@@ -1,0 +1,142 @@
+<!-- dynamicPricingController.html -->
+<template>
+    <div class="dynamic-pricing-container">
+        <!-- Loading Overlay -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner size="medium" alternative-text="Updating pricing settings..."></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Main Card -->
+        <div class="pricing-card">
+            <div class="card-header">
+                <div class="header-content">
+                    <lightning-icon icon-name="standard:price_books" size="medium" class="header-icon"></lightning-icon>
+                    <div class="header-text">
+                        <h2 class="card-title">Dynamic Pricing</h2>
+                        <p class="card-subtitle">Control dynamic pricing strategies</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="toggles-grid">
+                    
+                    <!-- Business Unit Toggle -->
+                    <div class="toggle-card bu-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:organization" size="small" class="toggle-icon bu-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Business Unit</h3>
+                                    <p class="toggle-description">Organization-wide pricing</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="businessUnit"
+                                    checked={businessUnitToggled}
+                                    data-type="businessUnit"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={businessUnitToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {businessUnitToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Territory Toggle -->
+                    <div class="toggle-card territory-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:location" size="small" class="toggle-icon territory-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Territory</h3>
+                                    <p class="toggle-description">Regional pricing rules</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="territory"
+                                    checked={territoryToggled}
+                                    data-type="territory"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={territoryToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {territoryToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Account Toggle -->
+                    <div class="toggle-card account-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:user" size="small" class="toggle-icon account-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Account</h3>
+                                    <p class="toggle-description">Customer-specific pricing</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="account"
+                                    checked={accountToggled}
+                                    data-type="account"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={accountToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {accountToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Channel Toggle -->
+                    <div class="toggle-card channel-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:portal" size="small" class="toggle-icon channel-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Channel</h3>
+                                    <p class="toggle-description">Channel-based pricing</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="channel"
+                                    checked={channelToggled}
+                                    data-type="channel"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={channelToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {channelToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
