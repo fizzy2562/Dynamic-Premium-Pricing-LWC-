@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__TabPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightningCommunity__Page</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__TabPage">
+            <property name="buEnabled" type="Boolean" default="false" label="Business Unit Enabled" description="Initial state for Business Unit toggle"/>
+            <property name="territoryEnabled" type="Boolean" default="false" label="Territory Enabled" description="Initial state for Territory toggle"/>
+            <property name="accountEnabled" type="Boolean" default="false" label="Account Enabled" description="Initial state for Account toggle"/>
+            <property name="channelEnabled" type="Boolean" default="false" label="Channel Enabled" description="Initial state for Channel toggle"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
