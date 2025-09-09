@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <defaultLandingTab>standard-Home</defaultLandingTab>
+    <isServiceCloudConsole>false</isServiceCloudConsole>
+    <label>Pricing Control Room</label>
+    <logo>null</logo>
+    <navType>Standard</navType>
+    <formFactors>Large</formFactors>
+    <formFactors>Small</formFactors>
+    <tabs>standard-Home</tabs>
+    <tabs>Dynamic_Pricing_Setting__c</tabs>
+    <tabs>Premium_Appointment_Setting__c</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>

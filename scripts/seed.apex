@@ -10,10 +10,7 @@ for (String t : types) {
         s.Name = t;
         s.Setting_Type__c = t;
         s.Is_Enabled__c = false;
-        s.Created_Date__c = System.now();
-        s.Last_Modified_Date__c = System.now();
-        s.Created_By__c = UserInfo.getUserId();
-        s.Last_Modified_By__c = UserInfo.getUserId();
+        // standard audit fields will auto-populate
         toInsertD.add(s);
     }
 }
@@ -30,10 +27,7 @@ for (String t : types) {
         s.Name = t;
         s.Setting_Type__c = t;
         s.Is_Enabled__c = false;
-        s.Created_Date__c = System.now();
-        s.Last_Modified_Date__c = System.now();
-        s.Created_By__c = UserInfo.getUserId();
-        s.Last_Modified_By__c = UserInfo.getUserId();
+        // standard audit fields will auto-populate
         toInsertP.add(s);
     }
 }
