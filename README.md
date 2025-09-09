@@ -1,6 +1,6 @@
-# Premium Appointments & Dynamic Pricing LWC Components
+# Premium Appointments & Dynamic Pricing (LWC + Apex)
 
-Two beautiful, modern Lightning Web Components for Salesforce that provide toggle controls for premium appointments and dynamic pricing features.
+Two Lightning Web Components backed by Apex controllers and two lightweight custom objects that let you manage premium appointments and dynamic pricing feature flags per scope (Business Unit, Territory, Account, Channel).
 
 ## Components
 
@@ -10,7 +10,7 @@ Two beautiful, modern Lightning Web Components for Salesforce that provide toggl
 - **Design**: Blue-purple gradient with modern glassmorphism effects
 - **Toggles**: Business Unit, Territory, Account, Channel
 
-### 2. Dynamic Pricing Controller  
+### 2. Dynamic Pricing Controller
 - **API Name**: `dynamicPricingController`
 - **Purpose**: Control dynamic pricing strategies
 - **Design**: Red-orange gradient with warm color scheme
@@ -64,33 +64,18 @@ salesforce-lwc-components/
 └── sfdx-project.json
 ```
 
-## Installation
+## Install & Deploy
 
-### Prerequisites
-You'll need to add these fields to your custom objects:
+- Prereqs: Salesforce CLI (`sf`), a default org or alias, and permissions to deploy metadata.
+- Clone and deploy:
+  - `git clone https://github.com/fizzy2562/Dynamic-Premium-Pricing-LWC-.git`
+  - `cd Dynamic-Premium-Pricing-LWC-`
+  - `sf org login web --alias MyDevOrg --set-default --instance-url https://login.salesforce.com`
+  - `sf project deploy start --target-org MyDevOrg --source-dir force-app --test-level NoTestRun`
 
-**Premium_Appointment_Setting__c Fields:**
-- `Setting_Type__c` (Text, 50, Required)
-- `Is_Enabled__c` (Checkbox, Default: false)
-- `Created_By__c` (Text, 18)
-- `Created_Date__c` (DateTime)
-- `Last_Modified_By__c` (Text, 18)
-- `Last_Modified_Date__c` (DateTime)
-
-**Dynamic_Pricing_Setting__c Fields:**
-- `Setting_Type__c` (Text, 50, Required)
-- `Is_Enabled__c` (Checkbox, Default: false)
-- `Base_Multiplier__c` (Number, 18, 4)
-- `Created_By__c` (Text, 18)
-- `Created_Date__c` (DateTime)
-- `Last_Modified_By__c` (Text, 18)
-- `Last_Modified_Date__c` (DateTime)
-
-### Deploy
-Use Salesforce CLI to deploy this project to your Salesforce org:
-```bash
-sfdx force:source:deploy -p force-app/
-```
+Objects and fields are included; you do NOT need to create audit-style custom fields. Each object contains only:
+- `Setting_Type__c` (Text)
+- `Is_Enabled__c` (Checkbox)
 
 ## Usage
 
@@ -111,6 +96,11 @@ Add to any Lightning page via App Builder and optionally set initial toggle stat
     channel-enabled="false">
 </c-dynamic-pricing-controller>
 ```
+
+### Pricing Control Room app
+- App Launcher → Pricing Control Room
+- Tabs: Dynamic Pricing Settings and Premium Appointment Settings
+- To place both LWCs on the app’s Home page: Home → Gear → Edit Page → drag `dynamicPricingController` and `premiumAppointmentController` onto the canvas → Save.
 
 ## Events
 
@@ -151,6 +141,22 @@ Both components dispatch `togglechange` events when toggles are modified:
 - `isDynamicPricingEnabled(String settingType)`
 - `getDynamicPriceMultiplier(String settingType, String recordId)`
 - `bulkUpdateDynamicPricingSettings(Map<String, Boolean> settingsMap)`
+
+## Seed Data (optional)
+
+Insert default records for both objects so toggles have initial values:
+
+- Anonymous Apex (file provided): `scripts/seed.apex`
+- Run: `sf apex run -o <alias> -f scripts/seed.apex`
+
+Creates records for: `businessUnit`, `territory`, `account`, `channel` with `Is_Enabled__c=false`.
+
+## Troubleshooting
+
+- OAuth port in use (1717): free the port or set `oauthLocalPort` in `sfdx-project.json`; or use `sfdx force:auth:web:login -p 1719`.
+- LWC targets: supported targets are App, Home, Record, and Community Page. Avoid deprecated `lightning__TabPage`.
+- “NothingToDeploy”: use `--ignore-conflicts` or run from the project root.
+- After deploy, custom fields can take a moment to appear in SOQL; if queries fail, retry after ~1–2 minutes.
 
 ## License
 
