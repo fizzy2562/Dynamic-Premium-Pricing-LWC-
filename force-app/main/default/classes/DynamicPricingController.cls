@@ -23,8 +23,6 @@ public with sharing class DynamicPricingController {
                 // Update existing setting
                 setting = existingSettings[0];
                 setting.Is_Enabled__c = isEnabled;
-                setting.Last_Modified_Date__c = System.now();
-                setting.Last_Modified_By__c = UserInfo.getUserId();
                 
                 update setting;
             } else {
@@ -32,10 +30,6 @@ public with sharing class DynamicPricingController {
                 setting = new Dynamic_Pricing_Setting__c();
                 setting.Setting_Type__c = settingType;
                 setting.Is_Enabled__c = isEnabled;
-                setting.Created_Date__c = System.now();
-                setting.Created_By__c = UserInfo.getUserId();
-                setting.Last_Modified_Date__c = System.now();
-                setting.Last_Modified_By__c = UserInfo.getUserId();
                 
                 insert setting;
             }
@@ -126,17 +120,11 @@ public with sharing class DynamicPricingController {
                     // Update existing
                     setting = existingSettingsMap.get(settingType);
                     setting.Is_Enabled__c = isEnabled;
-                    setting.Last_Modified_Date__c = System.now();
-                    setting.Last_Modified_By__c = UserInfo.getUserId();
                 } else {
                     // Create new
                     setting = new Dynamic_Pricing_Setting__c();
                     setting.Setting_Type__c = settingType;
                     setting.Is_Enabled__c = isEnabled;
-                    setting.Created_Date__c = System.now();
-                    setting.Created_By__c = UserInfo.getUserId();
-                    setting.Last_Modified_Date__c = System.now();
-                    setting.Last_Modified_By__c = UserInfo.getUserId();
                 }
                 
                 settingsToUpsert.add(setting);
@@ -194,8 +182,5 @@ public with sharing class DynamicPricingController {
     }
 
     // Legacy method - kept for compatibility
-    @AuraEnabled(cacheable=true)
-    public static List<Dynamic_Pricing_Setting__c> getDynamicPricingSettings() {
-        return [SELECT Id, Name FROM Dynamic_Pricing_Setting__c LIMIT 10];
-    }
+    // Legacy method removed to avoid duplicate signature
 }

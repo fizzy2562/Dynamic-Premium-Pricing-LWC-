@@ -1,0 +1,69 @@
+<template>
+    <lightning-card title="Custom Rule Builder" icon-name="custom:custom19">
+        <div class="slds-m-around_medium">
+            <!-- Criteria Section -->
+            <lightning-combobox
+                name="objectSelection"
+                label="Select Object"
+                value={selectedObject}
+                placeholder="Select Object"
+                options={objectOptions}
+                onchange={handleObjectChange}>
+            </lightning-combobox>
+
+            <lightning-input
+                name="criteriaField"
+                label="Field"
+                value={criteriaField}
+                placeholder="Field API Name"
+                onchange={handleFieldChange}>
+            </lightning-input>
+
+            <lightning-combobox
+                name="criteriaOperator"
+                label="Operator"
+                value={criteriaOperator}
+                placeholder="Select Operator"
+                options={operatorOptions}
+                onchange={handleOperatorChange}>
+            </lightning-combobox>
+
+            <lightning-input
+                name="criteriaValue"
+                label="Value"
+                value={criteriaValue}
+                placeholder="Value"
+                onchange={handleValueChange}>
+            </lightning-input>
+            
+            <!-- Actions Section -->
+            <lightning-combobox
+                name="actionType"
+                label="Action Type"
+                value={selectedAction}
+                placeholder="Select Action"
+                options={actionOptions}
+                onchange={handleActionChange}>
+            </lightning-combobox>
+
+            <lightning-input
+                name="actionField"
+                label="Field to Update"
+                value={actionField}
+                placeholder="Field API Name"
+                onchange={handleActionFieldChange}>
+            </lightning-input>
+
+            <lightning-input
+                name="actionValue"
+                label="Action Value"
+                value={actionValue}
+                placeholder="Value"
+                onchange={handleActionValueChange}>
+            </lightning-input>
+
+            <!-- Preview and Generate Code Button -->
+            <lightning-button label="Generate Code" onclick={generateCode} class="slds-m-top_medium"></lightning-button>
+        </div>
+    </lightning-card>
+</template>

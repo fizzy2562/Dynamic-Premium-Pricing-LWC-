@@ -23,8 +23,6 @@ public with sharing class PremiumAppointmentController {
                 // Update existing setting
                 setting = existingSettings[0];
                 setting.Is_Enabled__c = isEnabled;
-                setting.Last_Modified_Date__c = System.now();
-                setting.Last_Modified_By__c = UserInfo.getUserId();
                 
                 update setting;
             } else {
@@ -32,10 +30,6 @@ public with sharing class PremiumAppointmentController {
                 setting = new Premium_Appointment_Setting__c();
                 setting.Setting_Type__c = settingType;
                 setting.Is_Enabled__c = isEnabled;
-                setting.Created_Date__c = System.now();
-                setting.Created_By__c = UserInfo.getUserId();
-                setting.Last_Modified_Date__c = System.now();
-                setting.Last_Modified_By__c = UserInfo.getUserId();
                 
                 insert setting;
             }
@@ -126,17 +120,11 @@ public with sharing class PremiumAppointmentController {
                     // Update existing
                     setting = existingSettingsMap.get(settingType);
                     setting.Is_Enabled__c = isEnabled;
-                    setting.Last_Modified_Date__c = System.now();
-                    setting.Last_Modified_By__c = UserInfo.getUserId();
                 } else {
                     // Create new
                     setting = new Premium_Appointment_Setting__c();
                     setting.Setting_Type__c = settingType;
                     setting.Is_Enabled__c = isEnabled;
-                    setting.Created_Date__c = System.now();
-                    setting.Created_By__c = UserInfo.getUserId();
-                    setting.Last_Modified_Date__c = System.now();
-                    setting.Last_Modified_By__c = UserInfo.getUserId();
                 }
                 
                 settingsToUpsert.add(setting);

@@ -45,9 +45,12 @@
                             </div>
                         </div>
                         <div class="toggle-status">
-                            <span class={businessUnitToggled ? 'status-badge enabled' : 'status-badge disabled'}>
-                                {businessUnitToggled ? 'ACTIVE' : 'INACTIVE'}
-                            </span>
+                            <template if:true={businessUnitToggled}>
+                                <span class="status-badge enabled">ACTIVE</span>
+                            </template>
+                            <template if:false={businessUnitToggled}>
+                                <span class="status-badge disabled">INACTIVE</span>
+                            </template>
                         </div>
                     </div>
 
@@ -73,9 +76,12 @@
                             </div>
                         </div>
                         <div class="toggle-status">
-                            <span class={territoryToggled ? 'status-badge enabled' : 'status-badge disabled'}>
-                                {territoryToggled ? 'ACTIVE' : 'INACTIVE'}
-                            </span>
+                            <template if:true={territoryToggled}>
+                                <span class="status-badge enabled">ACTIVE</span>
+                            </template>
+                            <template if:false={territoryToggled}>
+                                <span class="status-badge disabled">INACTIVE</span>
+                            </template>
                         </div>
                     </div>
 
@@ -101,9 +107,12 @@
                             </div>
                         </div>
                         <div class="toggle-status">
-                            <span class={accountToggled ? 'status-badge enabled' : 'status-badge disabled'}>
-                                {accountToggled ? 'ACTIVE' : 'INACTIVE'}
-                            </span>
+                            <template if:true={accountToggled}>
+                                <span class="status-badge enabled">ACTIVE</span>
+                            </template>
+                            <template if:false={accountToggled}>
+                                <span class="status-badge disabled">INACTIVE</span>
+                            </template>
                         </div>
                     </div>
 
@@ -129,9 +138,12 @@
                             </div>
                         </div>
                         <div class="toggle-status">
-                            <span class={channelToggled ? 'status-badge enabled' : 'status-badge disabled'}>
-                                {channelToggled ? 'ACTIVE' : 'INACTIVE'}
-                            </span>
+                            <template if:true={channelToggled}>
+                                <span class="status-badge enabled">ACTIVE</span>
+                            </template>
+                            <template if:false={channelToggled}>
+                                <span class="status-badge disabled">INACTIVE</span>
+                            </template>
                         </div>
                     </div>
 
