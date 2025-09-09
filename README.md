@@ -1,5 +1,7 @@
 # Premium Appointments & Dynamic Pricing (LWC + Apex)
 
+[![Deploy to Salesforce](https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png)](https://githubsfdeploy.herokuapp.com?owner=fizzy2562&repo=Dynamic-Premium-Pricing-LWC-&ref=feat/pricing-control-room-config)
+
 Two Lightning Web Components backed by Apex controllers and two lightweight custom objects that let you manage premium appointments and dynamic pricing feature flags per scope (Business Unit, Territory, Account, Channel).
 
 ## Components
@@ -64,14 +66,9 @@ salesforce-lwc-components/
 └── sfdx-project.json
 ```
 
-## Install & Deploy
+## Deployment
 
-- Prereqs: Salesforce CLI (`sf`), a default org or alias, and permissions to deploy metadata.
-- Clone and deploy:
-  - `git clone https://github.com/fizzy2562/Dynamic-Premium-Pricing-LWC-.git`
-  - `cd Dynamic-Premium-Pricing-LWC-`
-  - `sf org login web --alias MyDevOrg --set-default --instance-url https://login.salesforce.com`
-  - `sf project deploy start --target-org MyDevOrg --source-dir force-app --test-level NoTestRun`
+Use the button above to deploy directly from GitHub, or deploy this package with your preferred metadata pipeline.
 
 Objects and fields are included; you do NOT need to create audit-style custom fields. Each object contains only:
 - `Setting_Type__c` (Text)
@@ -141,22 +138,6 @@ Both components dispatch `togglechange` events when toggles are modified:
 - `isDynamicPricingEnabled(String settingType)`
 - `getDynamicPriceMultiplier(String settingType, String recordId)`
 - `bulkUpdateDynamicPricingSettings(Map<String, Boolean> settingsMap)`
-
-## Seed Data (optional)
-
-Insert default records for both objects so toggles have initial values:
-
-- Anonymous Apex (file provided): `scripts/seed.apex`
-- Run: `sf apex run -o <alias> -f scripts/seed.apex`
-
-Creates records for: `businessUnit`, `territory`, `account`, `channel` with `Is_Enabled__c=false`.
-
-## Troubleshooting
-
-- OAuth port in use (1717): free the port or set `oauthLocalPort` in `sfdx-project.json`; or use `sfdx force:auth:web:login -p 1719`.
-- LWC targets: supported targets are App, Home, Record, and Community Page. Avoid deprecated `lightning__TabPage`.
-- “NothingToDeploy”: use `--ignore-conflicts` or run from the project root.
-- After deploy, custom fields can take a moment to appear in SOQL; if queries fail, retry after ~1–2 minutes.
 
 ## License
 
