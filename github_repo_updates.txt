@@ -1,0 +1,1721 @@
+================================================================================
+GITHUB REPOSITORY UPDATE INSTRUCTIONS
+================================================================================
+
+Replace the following files in your salesforce-lwc-components repository with 
+the complete code below. Your existing file structure is perfect - we just need 
+to replace the placeholder content with the full functionality.
+
+================================================================================
+FILE UPDATES NEEDED
+================================================================================
+
+--- UPDATE: force-app/main/default/lwc/premiumAppointmentController/premiumAppointmentController.js ---
+
+// premiumAppointmentController.js
+import { LightningElement, track, api } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import updatePremiumAppointmentSetting from '@salesforce/apex/PremiumAppointmentController.updatePremiumAppointmentSetting';
+
+export default class PremiumAppointmentController extends LightningElement {
+    @track toggleStates = {
+        businessUnit: false,
+        territory: false,
+        account: false,
+        channel: false
+    };
+    
+    @track isLoading = false;
+
+    // Public properties to set initial states
+    @api buEnabled = false;
+    @api territoryEnabled = false;
+    @api accountEnabled = false;
+    @api channelEnabled = false;
+
+    connectedCallback() {
+        // Initialize toggle states from public properties
+        this.toggleStates = {
+            businessUnit: this.buEnabled,
+            territory: this.territoryEnabled,
+            account: this.accountEnabled,
+            channel: this.channelEnabled
+        };
+    }
+
+    get businessUnitToggled() {
+        return this.toggleStates.businessUnit;
+    }
+
+    get territoryToggled() {
+        return this.toggleStates.territory;
+    }
+
+    get accountToggled() {
+        return this.toggleStates.account;
+    }
+
+    get channelToggled() {
+        return this.toggleStates.channel;
+    }
+
+    async handleToggleChange(event) {
+        const toggleType = event.target.dataset.type;
+        const newValue = event.target.checked;
+        
+        this.isLoading = true;
+        
+        try {
+            // Update the local state immediately for better UX
+            this.toggleStates = {
+                ...this.toggleStates,
+                [toggleType]: newValue
+            };
+
+            // Call Apex method to persist the change
+            await updatePremiumAppointmentSetting({
+                settingType: toggleType,
+                isEnabled: newValue
+            });
+
+            // Dispatch custom event for parent components
+            this.dispatchEvent(new CustomEvent('togglechange', {
+                detail: {
+                    type: toggleType,
+                    enabled: newValue,
+                    allStates: { ...this.toggleStates }
+                }
+            }));
+
+            this.showToast('Success', 
+                `Premium appointments ${newValue ? 'enabled' : 'disabled'} for ${this.getDisplayName(toggleType)}`, 
+                'success');
+
+        } catch (error) {
+            // Revert the toggle on error
+            this.toggleStates = {
+                ...this.toggleStates,
+                [toggleType]: !newValue
+            };
+            
+            // Force re-render to show the reverted state
+            this.template.querySelector(`[data-type="${toggleType}"]`).checked = !newValue;
+            
+            this.showToast('Error', 
+                `Failed to update ${this.getDisplayName(toggleType)} setting: ${error.body?.message || error.message}`, 
+                'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    getDisplayName(toggleType) {
+        const displayNames = {
+            businessUnit: 'Business Unit',
+            territory: 'Territory',
+            account: 'Account',
+            channel: 'Channel'
+        };
+        return displayNames[toggleType] || toggleType;
+    }
+
+    showToast(title, message, variant) {
+        const evt = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+            mode: 'dismissable'
+        });
+        this.dispatchEvent(evt);
+    }
+
+    // Public method to update toggle states programmatically
+    @api
+    updateToggleStates(newStates) {
+        this.toggleStates = { ...this.toggleStates, ...newStates };
+    }
+
+    // Public method to get current states
+    @api
+    getToggleStates() {
+        return { ...this.toggleStates };
+    }
+}
+
+--- UPDATE: force-app/main/default/lwc/premiumAppointmentController/premiumAppointmentController.html ---
+
+<!-- premiumAppointmentController.html -->
+<template>
+    <div class="premium-appointment-container">
+        <!-- Loading Overlay -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner size="medium" alternative-text="Updating settings..."></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Main Card -->
+        <div class="premium-card">
+            <div class="card-header">
+                <div class="header-content">
+                    <lightning-icon icon-name="standard:event" size="medium" class="header-icon"></lightning-icon>
+                    <div class="header-text">
+                        <h2 class="card-title">Premium Appointments</h2>
+                        <p class="card-subtitle">Control premium appointment availability</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="toggles-grid">
+                    
+                    <!-- Business Unit Toggle -->
+                    <div class="toggle-card bu-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:organization" size="small" class="toggle-icon bu-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Business Unit</h3>
+                                    <p class="toggle-description">Organization-wide settings</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="businessUnit"
+                                    checked={businessUnitToggled}
+                                    data-type="businessUnit"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={businessUnitToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {businessUnitToggled ? 'ENABLED' : 'DISABLED'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Territory Toggle -->
+                    <div class="toggle-card territory-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:location" size="small" class="toggle-icon territory-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Territory</h3>
+                                    <p class="toggle-description">Regional area control</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="territory"
+                                    checked={territoryToggled}
+                                    data-type="territory"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={territoryToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {territoryToggled ? 'ENABLED' : 'DISABLED'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Account Toggle -->
+                    <div class="toggle-card account-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:user" size="small" class="toggle-icon account-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Account</h3>
+                                    <p class="toggle-description">Client-specific access</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="account"
+                                    checked={accountToggled}
+                                    data-type="account"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={accountToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {accountToggled ? 'ENABLED' : 'DISABLED'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Channel Toggle -->
+                    <div class="toggle-card channel-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:portal" size="small" class="toggle-icon channel-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Channel</h3>
+                                    <p class="toggle-description">Distribution channel access</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="channel"
+                                    checked={channelToggled}
+                                    data-type="channel"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={channelToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {channelToggled ? 'ENABLED' : 'DISABLED'}
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+--- UPDATE: force-app/main/default/lwc/premiumAppointmentController/premiumAppointmentController.css ---
+
+/* premiumAppointmentController.css */
+.premium-appointment-container {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: 12px;
+}
+
+.premium-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.premium-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    --slds-c-icon-color-foreground-default: rgba(255, 255, 255, 0.9);
+}
+
+.header-text {
+    flex: 1;
+}
+
+.card-title {
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin: 0.5rem 0 0 0;
+    font-weight: 300;
+}
+
+.card-body {
+    background: white;
+    padding: 2rem;
+}
+
+.toggles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.toggle-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 2px solid #f1f5f9;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.toggle-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    transition: all 0.3s ease;
+}
+
+.bu-card::before {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.territory-card::before {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.account-card::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.channel-card::before {
+    background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+}
+
+.toggle-card:hover {
+    border-color: #e2e8f0;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.toggle-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.toggle-icon {
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.bu-icon {
+    background: rgba(59, 130, 246, 0.1);
+    --slds-c-icon-color-foreground-default: #3b82f6;
+}
+
+.territory-icon {
+    background: rgba(16, 185, 129, 0.1);
+    --slds-c-icon-color-foreground-default: #10b981;
+}
+
+.account-icon {
+    background: rgba(245, 158, 11, 0.1);
+    --slds-c-icon-color-foreground-default: #f59e0b;
+}
+
+.channel-icon {
+    background: rgba(139, 92, 246, 0.1);
+    --slds-c-icon-color-foreground-default: #8b5cf6;
+}
+
+.toggle-text {
+    flex: 1;
+}
+
+.toggle-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.toggle-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0 0;
+}
+
+.toggle-switch-container {
+    margin-left: 1rem;
+}
+
+.custom-toggle {
+    --slds-c-checkbox-toggle-color-background-checked: #059669;
+    --slds-c-checkbox-toggle-sizing-height: 2rem;
+    --slds-c-checkbox-toggle-sizing-width: 3.5rem;
+}
+
+.toggle-status {
+    display: flex;
+    justify-content: center;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.375rem 1rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.status-badge.enabled {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.disabled {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .toggles-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .toggle-card {
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .toggle-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .toggle-switch-container {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+}
+
+/* Animation for status changes */
+.status-badge {
+    animation: statusPulse 0.3s ease-in-out;
+}
+
+@keyframes statusPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Custom focus states */
+.custom-toggle:focus-within {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    border-radius: 20px;
+}
+
+--- UPDATE: force-app/main/default/lwc/premiumAppointmentController/premiumAppointmentController.js-meta.xml ---
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__TabPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightningCommunity__Page</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__TabPage">
+            <property name="buEnabled" type="Boolean" default="false" label="Business Unit Enabled" description="Initial state for Business Unit toggle"/>
+            <property name="territoryEnabled" type="Boolean" default="false" label="Territory Enabled" description="Initial state for Territory toggle"/>
+            <property name="accountEnabled" type="Boolean" default="false" label="Account Enabled" description="Initial state for Account toggle"/>
+            <property name="channelEnabled" type="Boolean" default="false" label="Channel Enabled" description="Initial state for Channel toggle"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
+
+--- UPDATE: force-app/main/default/lwc/dynamicPricingController/dynamicPricingController.js ---
+
+// dynamicPricingController.js
+import { LightningElement, track, api } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import updateDynamicPricingSetting from '@salesforce/apex/DynamicPricingController.updateDynamicPricingSetting';
+
+export default class DynamicPricingController extends LightningElement {
+    @track toggleStates = {
+        businessUnit: false,
+        territory: false,
+        account: false,
+        channel: false
+    };
+    
+    @track isLoading = false;
+
+    // Public properties to set initial states
+    @api buEnabled = false;
+    @api territoryEnabled = false;
+    @api accountEnabled = false;
+    @api channelEnabled = false;
+
+    connectedCallback() {
+        // Initialize toggle states from public properties
+        this.toggleStates = {
+            businessUnit: this.buEnabled,
+            territory: this.territoryEnabled,
+            account: this.accountEnabled,
+            channel: this.channelEnabled
+        };
+    }
+
+    get businessUnitToggled() {
+        return this.toggleStates.businessUnit;
+    }
+
+    get territoryToggled() {
+        return this.toggleStates.territory;
+    }
+
+    get accountToggled() {
+        return this.toggleStates.account;
+    }
+
+    get channelToggled() {
+        return this.toggleStates.channel;
+    }
+
+    async handleToggleChange(event) {
+        const toggleType = event.target.dataset.type;
+        const newValue = event.target.checked;
+        
+        this.isLoading = true;
+        
+        try {
+            // Update the local state immediately for better UX
+            this.toggleStates = {
+                ...this.toggleStates,
+                [toggleType]: newValue
+            };
+
+            // Call Apex method to persist the change
+            await updateDynamicPricingSetting({
+                settingType: toggleType,
+                isEnabled: newValue
+            });
+
+            // Dispatch custom event for parent components
+            this.dispatchEvent(new CustomEvent('togglechange', {
+                detail: {
+                    type: toggleType,
+                    enabled: newValue,
+                    allStates: { ...this.toggleStates }
+                }
+            }));
+
+            this.showToast('Success', 
+                `Dynamic pricing ${newValue ? 'enabled' : 'disabled'} for ${this.getDisplayName(toggleType)}`, 
+                'success');
+
+        } catch (error) {
+            // Revert the toggle on error
+            this.toggleStates = {
+                ...this.toggleStates,
+                [toggleType]: !newValue
+            };
+            
+            // Force re-render to show the reverted state
+            this.template.querySelector(`[data-type="${toggleType}"]`).checked = !newValue;
+            
+            this.showToast('Error', 
+                `Failed to update ${this.getDisplayName(toggleType)} dynamic pricing: ${error.body?.message || error.message}`, 
+                'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    getDisplayName(toggleType) {
+        const displayNames = {
+            businessUnit: 'Business Unit',
+            territory: 'Territory',
+            account: 'Account',
+            channel: 'Channel'
+        };
+        return displayNames[toggleType] || toggleType;
+    }
+
+    showToast(title, message, variant) {
+        const evt = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+            mode: 'dismissable'
+        });
+        this.dispatchEvent(evt);
+    }
+
+    // Public method to update toggle states programmatically
+    @api
+    updateToggleStates(newStates) {
+        this.toggleStates = { ...this.toggleStates, ...newStates };
+    }
+
+    // Public method to get current states
+    @api
+    getToggleStates() {
+        return { ...this.toggleStates };
+    }
+}
+
+--- UPDATE: force-app/main/default/lwc/dynamicPricingController/dynamicPricingController.html ---
+
+<!-- dynamicPricingController.html -->
+<template>
+    <div class="dynamic-pricing-container">
+        <!-- Loading Overlay -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner size="medium" alternative-text="Updating pricing settings..."></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Main Card -->
+        <div class="pricing-card">
+            <div class="card-header">
+                <div class="header-content">
+                    <lightning-icon icon-name="standard:price_books" size="medium" class="header-icon"></lightning-icon>
+                    <div class="header-text">
+                        <h2 class="card-title">Dynamic Pricing</h2>
+                        <p class="card-subtitle">Control dynamic pricing strategies</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="toggles-grid">
+                    
+                    <!-- Business Unit Toggle -->
+                    <div class="toggle-card bu-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:organization" size="small" class="toggle-icon bu-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Business Unit</h3>
+                                    <p class="toggle-description">Organization-wide pricing</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="businessUnit"
+                                    checked={businessUnitToggled}
+                                    data-type="businessUnit"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={businessUnitToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {businessUnitToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Territory Toggle -->
+                    <div class="toggle-card territory-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:location" size="small" class="toggle-icon territory-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Territory</h3>
+                                    <p class="toggle-description">Regional pricing rules</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="territory"
+                                    checked={territoryToggled}
+                                    data-type="territory"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={territoryToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {territoryToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Account Toggle -->
+                    <div class="toggle-card account-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:user" size="small" class="toggle-icon account-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Account</h3>
+                                    <p class="toggle-description">Customer-specific pricing</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="account"
+                                    checked={accountToggled}
+                                    data-type="account"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={accountToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {accountToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Channel Toggle -->
+                    <div class="toggle-card channel-card">
+                        <div class="toggle-content">
+                            <div class="toggle-info">
+                                <lightning-icon icon-name="standard:portal" size="small" class="toggle-icon channel-icon"></lightning-icon>
+                                <div class="toggle-text">
+                                    <h3 class="toggle-title">Channel</h3>
+                                    <p class="toggle-description">Channel-based pricing</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch-container">
+                                <lightning-input
+                                    type="toggle"
+                                    name="channel"
+                                    checked={channelToggled}
+                                    data-type="channel"
+                                    onchange={handleToggleChange}
+                                    class="custom-toggle">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="toggle-status">
+                            <span class={channelToggled ? 'status-badge enabled' : 'status-badge disabled'}>
+                                {channelToggled ? 'ACTIVE' : 'INACTIVE'}
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+--- UPDATE: force-app/main/default/lwc/dynamicPricingController/dynamicPricingController.css ---
+
+/* dynamicPricingController.css */
+.dynamic-pricing-container {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: 12px;
+}
+
+.pricing-card {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricing-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    --slds-c-icon-color-foreground-default: rgba(255, 255, 255, 0.9);
+}
+
+.header-text {
+    flex: 1;
+}
+
+.card-title {
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin: 0.5rem 0 0 0;
+    font-weight: 300;
+}
+
+.card-body {
+    background: white;
+    padding: 2rem;
+}
+
+.toggles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.toggle-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 2px solid #f1f5f9;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.toggle-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    transition: all 0.3s ease;
+}
+
+.bu-card::before {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.territory-card::before {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+.account-card::before {
+    background: linear-gradient(90deg, #9b59b6, #8e44ad);
+}
+
+.channel-card::before {
+    background: linear-gradient(90deg, #e67e22, #d35400);
+}
+
+.toggle-card:hover {
+    border-color: #e2e8f0;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.toggle-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.toggle-icon {
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.bu-icon {
+    background: rgba(231, 76, 60, 0.1);
+    --slds-c-icon-color-foreground-default: #e74c3c;
+}
+
+.territory-icon {
+    background: rgba(243, 156, 18, 0.1);
+    --slds-c-icon-color-foreground-default: #f39c12;
+}
+
+.account-icon {
+    background: rgba(155, 89, 182, 0.1);
+    --slds-c-icon-color-foreground-default: #9b59b6;
+}
+
+.channel-icon {
+    background: rgba(230, 126, 34, 0.1);
+    --slds-c-icon-color-foreground-default: #e67e22;
+}
+
+.toggle-text {
+    flex: 1;
+}
+
+.toggle-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.toggle-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0 0;
+}
+
+.toggle-switch-container {
+    margin-left: 1rem;
+}
+
+.custom-toggle {
+    --slds-c-checkbox-toggle-color-background-checked: #e74c3c;
+    --slds-c-checkbox-toggle-sizing-height: 2rem;
+    --slds-c-checkbox-toggle-sizing-width: 3.5rem;
+}
+
+.toggle-status {
+    display: flex;
+    justify-content: center;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.375rem 1rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.status-badge.enabled {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.status-badge.disabled {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .toggles-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .toggle-card {
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .toggle-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .toggle-switch-container {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+}
+
+/* Animation for status changes */
+.status-badge {
+    animation: statusPulse 0.3s ease-in-out;
+}
+
+@keyframes statusPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Custom focus states */
+.custom-toggle:focus-within {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+    border-radius: 20px;
+}
+
+--- UPDATE: force-app/main/default/lwc/dynamicPricingController/dynamicPricingController.js-meta.xml ---
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__TabPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightningCommunity__Page</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__TabPage">
+            <property name="buEnabled" type="Boolean" default="false" label="Business Unit Enabled" description="Initial state for Business Unit dynamic pricing"/>
+            <property name="territoryEnabled" type="Boolean" default="false" label="Territory Enabled" description="Initial state for Territory dynamic pricing"/>
+            <property name="accountEnabled" type="Boolean" default="false" label="Account Enabled" description="Initial state for Account dynamic pricing"/>
+            <property name="channelEnabled" type="Boolean" default="false" label="Channel Enabled" description="Initial state for Channel dynamic pricing"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
+
+--- UPDATE: force-app/main/default/classes/PremiumAppointmentController.cls ---
+
+// PremiumAppointmentController.cls
+public with sharing class PremiumAppointmentController {
+    
+    @AuraEnabled
+    public static void updatePremiumAppointmentSetting(String settingType, Boolean isEnabled) {
+        try {
+            // Validate input
+            if (String.isBlank(settingType)) {
+                throw new AuraHandledException('Setting type is required');
+            }
+            
+            // Check if setting already exists
+            List<Premium_Appointment_Setting__c> existingSettings = [
+                SELECT Id, Is_Enabled__c, Setting_Type__c
+                FROM Premium_Appointment_Setting__c
+                WHERE Setting_Type__c = :settingType
+                LIMIT 1
+            ];
+            
+            Premium_Appointment_Setting__c setting;
+            
+            if (!existingSettings.isEmpty()) {
+                // Update existing setting
+                setting = existingSettings[0];
+                setting.Is_Enabled__c = isEnabled;
+                setting.Last_Modified_Date__c = System.now();
+                setting.Last_Modified_By__c = UserInfo.getUserId();
+                
+                update setting;
+            } else {
+                // Create new setting
+                setting = new Premium_Appointment_Setting__c();
+                setting.Setting_Type__c = settingType;
+                setting.Is_Enabled__c = isEnabled;
+                setting.Created_Date__c = System.now();
+                setting.Created_By__c = UserInfo.getUserId();
+                setting.Last_Modified_Date__c = System.now();
+                setting.Last_Modified_By__c = UserInfo.getUserId();
+                
+                insert setting;
+            }
+            
+            // Log the change
+            System.debug('Premium Appointment Setting updated: ' + settingType + ' = ' + isEnabled);
+            
+        } catch (DmlException e) {
+            throw new AuraHandledException('Database error: ' + e.getMessage());
+        } catch (Exception e) {
+            throw new AuraHandledException('Error updating Premium Appointment Setting: ' + e.getMessage());
+        }
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static Map<String, Boolean> getPremiumAppointmentSettings() {
+        try {
+            Map<String, Boolean> settingsMap = new Map<String, Boolean>();
+            
+            // Initialize all settings to false
+            settingsMap.put('businessUnit', false);
+            settingsMap.put('territory', false);
+            settingsMap.put('account', false);
+            settingsMap.put('channel', false);
+            
+            // Get current settings from database
+            List<Premium_Appointment_Setting__c> settings = [
+                SELECT Setting_Type__c, Is_Enabled__c
+                FROM Premium_Appointment_Setting__c
+                WHERE Setting_Type__c IN ('businessUnit', 'territory', 'account', 'channel')
+            ];
+            
+            // Update map with actual values
+            for (Premium_Appointment_Setting__c setting : settings) {
+                settingsMap.put(setting.Setting_Type__c, setting.Is_Enabled__c);
+            }
+            
+            return settingsMap;
+            
+        } catch (Exception e) {
+            throw new AuraHandledException('Error fetching Premium Appointment Settings: ' + e.getMessage());
+        }
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static Boolean isPremiumAppointmentEnabled(String settingType) {
+        try {
+            if (String.isBlank(settingType)) {
+                return false;
+            }
+            
+            List<Premium_Appointment_Setting__c> settings = [
+                SELECT Is_Enabled__c
+                FROM Premium_Appointment_Setting__c
+                WHERE Setting_Type__c = :settingType
+                LIMIT 1
+            ];
+            
+            return !settings.isEmpty() ? settings[0].Is_Enabled__c : false;
+            
+        } catch (Exception e) {
+            System.debug('Error checking Premium Appointment status: ' + e.getMessage());
+            return false;
+        }
+    }
+    
+    @AuraEnabled
+    public static void bulkUpdatePremiumAppointmentSettings(Map<String, Boolean> settingsMap) {
+        try {
+            List<Premium_Appointment_Setting__c> settingsToUpsert = new List<Premium_Appointment_Setting__c>();
+            
+            // Get existing settings
+            Map<String, Premium_Appointment_Setting__c> existingSettingsMap = new Map<String, Premium_Appointment_Setting__c>();
+            for (Premium_Appointment_Setting__c setting : [
+                SELECT Id, Setting_Type__c, Is_Enabled__c
+                FROM Premium_Appointment_Setting__c
+                WHERE Setting_Type__c IN :settingsMap.keySet()
+            ]) {
+                existingSettingsMap.put(setting.Setting_Type__c, setting);
+            }
+            
+            // Process each setting
+            for (String settingType : settingsMap.keySet()) {
+                Boolean isEnabled = settingsMap.get(settingType);
+                Premium_Appointment_Setting__c setting;
+                
+                if (existingSettingsMap.containsKey(settingType)) {
+                    // Update existing
+                    setting = existingSettingsMap.get(settingType);
+                    setting.Is_Enabled__c = isEnabled;
+                    setting.Last_Modified_Date__c = System.now();
+                    setting.Last_Modified_By__c = UserInfo.getUserId();
+                } else {
+                    // Create new
+                    setting = new Premium_Appointment_Setting__c();
+                    setting.Setting_Type__c = settingType;
+                    setting.Is_Enabled__c = isEnabled;
+                    setting.Created_Date__c = System.now();
+                    setting.Created_By__c = UserInfo.getUserId();
+                    setting.Last_Modified_Date__c = System.now();
+                    setting.Last_Modified_By__c = UserInfo.getUserId();
+                }
+                
+                settingsToUpsert.add(setting);
+            }
+            
+            upsert settingsToUpsert Id;
+            
+        } catch (Exception e) {
+            throw new AuraHandledException('Error bulk updating Premium Appointment Settings: ' + e.getMessage());
+        }
+    }
+
+    // Legacy method - kept for compatibility
+    @AuraEnabled(cacheable=true)
+    public static List<Premium_Appointment_Setting__c> getPremiumAppointments() {
+        return [SELECT Id, Name FROM Premium_Appointment_Setting__c LIMIT 10];
+    }
+}
+
+--- UPDATE: force-app/main/default/classes/DynamicPricingController.cls ---
+
+// DynamicPricingController.cls
+public with sharing class DynamicPricingController {
+    
+    @AuraEnabled
+    public static void updateDynamicPricingSetting(String settingType, Boolean isEnabled) {
+        try {
+            // Validate input
+            if (String.isBlank(settingType)) {
+                throw new AuraHandledException('Setting type is required');
+            }
+            
+            // Check if setting already exists
+            List<Dynamic_Pricing_Setting__c> existingSettings = [
+                SELECT Id, Is_Enabled__c, Setting_Type__c
+                FROM Dynamic_Pricing_Setting__c
+                WHERE Setting_Type__c = :settingType
+                LIMIT 1
+            ];
+            
+            Dynamic_Pricing_Setting__c setting;
+            
+            if (!existingSettings.isEmpty()) {
+                // Update existing setting
+                setting = existingSettings[0];
+                setting.Is_Enabled__c = isEnabled;
+                setting.Last_Modified_Date__c = System.now();
+                setting.Last_Modified_By__c = UserInfo.getUserId();
+                
+                update setting;
+            } else {
+                // Create new setting
+                setting = new Dynamic_Pricing_Setting__c();
+                setting.Setting_Type__c = settingType;
+                setting.Is_Enabled__c = isEnabled;
+                setting.Created_Date__c = System.now();
+                setting.Created_By__c = UserInfo.getUserId();
+                setting.Last_Modified_Date__c = System.now();
+                setting.Last_Modified_By__c = UserInfo.getUserId();
+                
+                insert setting;
+            }
+            
+            // Log the change
+            System.debug('Dynamic Pricing Setting updated: ' + settingType + ' = ' + isEnabled);
+            
+        } catch (DmlException e) {
+            throw new AuraHandledException('Database error: ' + e.getMessage());
+        } catch (Exception e) {
+            throw new AuraHandledException('Error updating Dynamic Pricing Setting: ' + e.getMessage());
+        }
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static Map<String, Boolean> getDynamicPricingSettings() {
+        try {
+            Map<String, Boolean> settingsMap = new Map<String, Boolean>();
+            
+            // Initialize all settings to false
+            settingsMap.put('businessUnit', false);
+            settingsMap.put('territory', false);
+            settingsMap.put('account', false);
+            settingsMap.put('channel', false);
+            
+            // Get current settings from database
+            List<Dynamic_Pricing_Setting__c> settings = [
+                SELECT Setting_Type__c, Is_Enabled__c
+                FROM Dynamic_Pricing_Setting__c
+                WHERE Setting_Type__c IN ('businessUnit', 'territory', 'account', 'channel')
+            ];
+            
+            // Update map with actual values
+            for (Dynamic_Pricing_Setting__c setting : settings) {
+                settingsMap.put(setting.Setting_Type__c, setting.Is_Enabled__c);
+            }
+            
+            return settingsMap;
+            
+        } catch (Exception e) {
+            throw new AuraHandledException('Error fetching Dynamic Pricing Settings: ' + e.getMessage());
+        }
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static Boolean isDynamicPricingEnabled(String settingType) {
+        try {
+            if (String.isBlank(settingType)) {
+                return false;
+            }
+            
+            List<Dynamic_Pricing_Setting__c> settings = [
+                SELECT Is_Enabled__c
+                FROM Dynamic_Pricing_Setting__c
+                WHERE Setting_Type__c = :settingType
+                LIMIT 1
+            ];
+            
+            return !settings.isEmpty() ? settings[0].Is_Enabled__c : false;
+            
+        } catch (Exception e) {
+            System.debug('Error checking Dynamic Pricing status: ' + e.getMessage());
+            return false;
+        }
+    }
+    
+    @AuraEnabled
+    public static void bulkUpdateDynamicPricingSettings(Map<String, Boolean> settingsMap) {
+        try {
+            List<Dynamic_Pricing_Setting__c> settingsToUpsert = new List<Dynamic_Pricing_Setting__c>();
+            
+            // Get existing settings
+            Map<String, Dynamic_Pricing_Setting__c> existingSettingsMap = new Map<String, Dynamic_Pricing_Setting__c>();
+            for (Dynamic_Pricing_Setting__c setting : [
+                SELECT Id, Setting_Type__c, Is_Enabled__c
+                FROM Dynamic_Pricing_Setting__c
+                WHERE Setting_Type__c IN :settingsMap.keySet()
+            ]) {
+                existingSettingsMap.put(setting.Setting_Type__c, setting);
+            }
+            
+            // Process each setting
+            for (String settingType : settingsMap.keySet()) {
+                Boolean isEnabled = settingsMap.get(settingType);
+                Dynamic_Pricing_Setting__c setting;
+                
+                if (existingSettingsMap.containsKey(settingType)) {
+                    // Update existing
+                    setting = existingSettingsMap.get(settingType);
+                    setting.Is_Enabled__c = isEnabled;
+                    setting.Last_Modified_Date__c = System.now();
+                    setting.Last_Modified_By__c = UserInfo.getUserId();
+                } else {
+                    // Create new
+                    setting = new Dynamic_Pricing_Setting__c();
+                    setting.Setting_Type__c = settingType;
+                    setting.Is_Enabled__c = isEnabled;
+                    setting.Created_Date__c = System.now();
+                    setting.Created_By__c = UserInfo.getUserId();
+                    setting.Last_Modified_Date__c = System.now();
+                    setting.Last_Modified_By__c = UserInfo.getUserId();
+                }
+                
+                settingsToUpsert.add(setting);
+            }
+            
+            upsert settingsToUpsert Id;
+            
+        } catch (Exception e) {
+            throw new AuraHandledException('Error bulk updating Dynamic Pricing Settings: ' + e.getMessage());
+        }
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static Decimal getDynamicPriceMultiplier(String settingType, String recordId) {
+        try {
+            // Default multiplier
+            Decimal baseMultiplier = 1.0;
+            
+            // Check if dynamic pricing is enabled for this setting type
+            if (!isDynamicPricingEnabled(settingType)) {
+                return baseMultiplier;
+            }
+            
+            // You can extend this to calculate actual multipliers based on:
+            // - Market conditions
+            // - Demand/Supply ratios
+            // - Customer tier
+            // - Time-based pricing
+            // - Inventory levels
+            // - Competitive analysis
+            
+            // For now, return a simple example multiplier
+            switch on settingType {
+                when 'businessUnit' {
+                    return 1.1; // 10% increase for BU level
+                }
+                when 'territory' {
+                    return 1.05; // 5% increase for territory
+                }
+                when 'account' {
+                    return 0.95; // 5% discount for account-specific
+                }
+                when 'channel' {
+                    return 1.15; // 15% increase for channel
+                }
+                when else {
+                    return baseMultiplier;
+                }
+            }
+            
+        } catch (Exception e) {
+            System.debug('Error calculating dynamic price multiplier: ' + e.getMessage());
+            return 1.0; // Return base multiplier on error
+        }
+    }
+
+    // Legacy method - kept for compatibility
+    @AuraEnabled(cacheable=true)
+    public static List<Dynamic_Pricing_Setting__c> getDynamicPricingSettings() {
+        return [SELECT Id, Name FROM Dynamic_Pricing_Setting__c LIMIT 10];
+    }
+}
+
+--- UPDATE: README.md ---
+
+# Premium Appointments & Dynamic Pricing LWC Components
+
+Two beautiful, modern Lightning Web Components for Salesforce that provide toggle controls for premium appointments and dynamic pricing features.
+
+## Components
+
+### 1. Premium Appointment Controller
+- **API Name**: `premiumAppointmentController`
+- **Purpose**: Control premium appointment availability
+- **Design**: Blue-purple gradient with modern glassmorphism effects
+- **Toggles**: Business Unit, Territory, Account, Channel
+
+### 2. Dynamic Pricing Controller  
+- **API Name**: `dynamicPricingController`
+- **Purpose**: Control dynamic pricing strategies
+- **Design**: Red-orange gradient with warm color scheme
+- **Toggles**: Business Unit, Territory, Account, Channel
+
+## Features
+
+✨ **Modern Design**
+- Gradient backgrounds with glassmorphism effects
+- Smooth animations and hover effects  
+- Responsive grid layout
+- Color-coded toggle cards
+
+🔧 **Functional**
+- Real-time toggle state management
+- Apex backend integration
+- Error handling with user feedback
+- Loading states and spinners
+
+📱 **Responsive**
+- Mobile-friendly design
+- Adaptive grid layouts
+- Touch-friendly controls
+
+## Project Structure
+```
+salesforce-lwc-components/
+├── force-app/
+│   └── main/
+│       └── default/
+│           ├── lwc/
+│           │   ├── premiumAppointmentController/
+│           │   │   ├── premiumAppointmentController.html
+│           │   │   ├── premiumAppointmentController.js
+│           │   │   ├── premiumAppointmentController.css
+│           │   │   └── premiumAppointmentController.js-meta.xml
+│           │   └── dynamicPricingController/
+│           │       ├── dynamicPricingController.html
+│           │       ├── dynamicPricingController.js
+│           │       ├── dynamicPricingController.css
+│           │       └── dynamicPricingController.js-meta.xml
+│           ├── classes/
+│           │   ├── PremiumAppointmentController.cls
+│           │   ├── PremiumAppointmentController.cls-meta.xml
+│           │   ├── DynamicPricingController.cls
+│           │   └── DynamicPricingController.cls-meta.xml
+│           └── objects/
+│               ├── Premium_Appointment_Setting__c/
+│               └── Dynamic_Pricing_Setting__c/
+├── README.md
+└── sfdx-project.json
+```
+
+## Installation
+
+### Prerequisites
+You'll need to add these fields to your custom objects:
+
+**Premium_Appointment_Setting__c Fields:**
+- `Setting_Type__c` (Text, 50, Required)
+- `Is_Enabled__c` (Checkbox, Default: false)
+- `Created_By__c` (Text, 18)
+- `Created_Date__c` (DateTime)
+- `Last_Modified_By__c` (Text, 18)
+- `Last_Modified_Date__c` (DateTime)
+
+**Dynamic_Pricing_Setting__c Fields:**
+- `Setting_Type__c` (Text, 50, Required)
+- `Is_Enabled__c` (Checkbox, Default: false)
+- `Base_Multiplier__c` (Number, 18, 4)
+- `Created_By__c` (Text, 18)
+- `Created_Date__c` (DateTime)
+- `Last_Modified_By__c` (Text, 18)
+- `Last_Modified_Date__c` (DateTime)
+
+### Deploy
+Use Salesforce CLI to deploy this project to your Salesforce org:
+```bash
+sfdx force:source:deploy -p force-app/
+```
+
+## Usage
+
+Add to any Lightning page via App Builder and optionally set initial toggle states:
+
+```html
+<c-premium-appointment-controller 
+    bu-enabled="true"
+    territory-enabled="false"
+    account-enabled="false"
+    channel-enabled="true">
+</c-premium-appointment-controller>
+
+<c-dynamic-pricing-controller 
+    bu-enabled="false"
+    territory-enabled="true"
+    account-enabled="true"
+    channel-enabled="false">
+</c-dynamic-pricing-controller>
+```
+
+## Events
+
+Both components dispatch `togglechange` events when toggles are modified:
+
+```javascript
+// Event detail structure
+{
+    type: 'businessUnit',     // Toggle type that changed
+    enabled: true,            // New state
+    allStates: {              // All current states
+        businessUnit: true,
+        territory: false,
+        account: false,
+        channel: true
+    }
+}
+```
+
+## Customization
+
+- Modify CSS variables in the component CSS files
+- Adjust colors, gradients, and animations
+- Extend Apex controllers for additional business logic
+- Add new toggle types by updating the component logic
+
+## API Methods
+
+### Premium Appointment Controller
+- `updatePremiumAppointmentSetting(String settingType, Boolean isEnabled)`
+- `getPremiumAppointmentSettings()` - Returns Map<String, Boolean>
+- `isPremiumAppointmentEnabled(String settingType)`
+- `bulkUpdatePremiumAppointmentSettings(Map<String, Boolean> settingsMap)`
+
+### Dynamic Pricing Controller
+- `updateDynamicPricingSetting(String settingType, Boolean isEnabled)`
+- `getDynamicPricingSettings()` - Returns Map<String, Boolean>
+- `isDynamicPricingEnabled(String settingType)`
+- `getDynamicPriceMultiplier(String settingType, String recordId)`
+- `bulkUpdateDynamicPricingSettings(Map<String, Boolean> settingsMap)`
+
+## License
+
+Open source - feel free to modify and extend for your needs!
+
+--- ADDITIONAL SETUP REQUIRED ---
+
+You need to add the following custom fields to your existing custom objects. Go to Setup > Object Manager and add these fields:
+
+FOR Premium_Appointment_Setting__c:
+- Setting_Type__c (Text, Length: 50, Required)
+- Is_Enabled__c (Checkbox, Default Value: Unchecked)
+- Created_By__c (Text, Length: 18)
+- Created_Date__c (Date/Time)
+- Last_Modified_By__c (Text, Length: 18) 
+- Last_Modified_Date__c (Date/Time)
+
+FOR Dynamic_Pricing_Setting__c:
+- Setting_Type__c (Text, Length: 50, Required)
+- Is_Enabled__c (Checkbox, Default Value: Unchecked)
+- Base_Multiplier__c (Number, Length: 18, Decimal Places: 4)
+- Created_By__c (Text, Length: 18)
+- Created_Date__c (Date/Time)
+- Last_Modified_By__c (Text, Length: 18)
+- Last_Modified_Date__c (Date/Time)
+
+================================================================================
+SUMMARY OF CHANGES NEEDED
+================================================================================
+
+REPLACE these files in your GitHub repo:
+✅ All LWC JavaScript files (.js)
+✅ All LWC HTML files (.html) 
+✅ All LWC CSS files (.css)
+✅ All LWC metadata files (.js-meta.xml)
+✅ All Apex controller files (.cls)
+✅ README.md
+
+KEEP these files as-is:
+✅ Custom object metadata files (.object-meta.xml)
+✅ Apex metadata files (.cls-meta.xml) 
+✅ sfdx-project.json
+
+ADD custom fields to your Salesforce org as described above.
+
+After these updates, you'll have fully functional, beautiful toggle components ready to deploy!
