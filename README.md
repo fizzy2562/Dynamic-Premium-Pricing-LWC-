@@ -1,6 +1,8 @@
-# Premium Appointments & Dynamic Pricing LWC Components
+# Premium Appointments & Dynamic Pricing (LWC + Apex)
 
-Two beautiful, modern Lightning Web Components for Salesforce that provide toggle controls for premium appointments and dynamic pricing features.
+[![Deploy to Salesforce](https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png)](https://githubsfdeploy.herokuapp.com?owner=fizzy2562&repo=Dynamic-Premium-Pricing-LWC-&ref=feat/pricing-control-room-config)
+
+Two Lightning Web Components backed by Apex controllers and two lightweight custom objects that let you manage premium appointments and dynamic pricing feature flags per scope (Business Unit, Territory, Account, Channel).
 
 ## Components
 
@@ -10,7 +12,7 @@ Two beautiful, modern Lightning Web Components for Salesforce that provide toggl
 - **Design**: Blue-purple gradient with modern glassmorphism effects
 - **Toggles**: Business Unit, Territory, Account, Channel
 
-### 2. Dynamic Pricing Controller  
+### 2. Dynamic Pricing Controller
 - **API Name**: `dynamicPricingController`
 - **Purpose**: Control dynamic pricing strategies
 - **Design**: Red-orange gradient with warm color scheme
@@ -64,33 +66,13 @@ salesforce-lwc-components/
 └── sfdx-project.json
 ```
 
-## Installation
+## Deployment
 
-### Prerequisites
-You'll need to add these fields to your custom objects:
+Use the button above to deploy directly from GitHub, or deploy this package with your preferred metadata pipeline.
 
-**Premium_Appointment_Setting__c Fields:**
-- `Setting_Type__c` (Text, 50, Required)
-- `Is_Enabled__c` (Checkbox, Default: false)
-- `Created_By__c` (Text, 18)
-- `Created_Date__c` (DateTime)
-- `Last_Modified_By__c` (Text, 18)
-- `Last_Modified_Date__c` (DateTime)
-
-**Dynamic_Pricing_Setting__c Fields:**
-- `Setting_Type__c` (Text, 50, Required)
-- `Is_Enabled__c` (Checkbox, Default: false)
-- `Base_Multiplier__c` (Number, 18, 4)
-- `Created_By__c` (Text, 18)
-- `Created_Date__c` (DateTime)
-- `Last_Modified_By__c` (Text, 18)
-- `Last_Modified_Date__c` (DateTime)
-
-### Deploy
-Use Salesforce CLI to deploy this project to your Salesforce org:
-```bash
-sfdx force:source:deploy -p force-app/
-```
+Objects and fields are included; you do NOT need to create audit-style custom fields. Each object contains only:
+- `Setting_Type__c` (Text)
+- `Is_Enabled__c` (Checkbox)
 
 ## Usage
 
@@ -111,6 +93,11 @@ Add to any Lightning page via App Builder and optionally set initial toggle stat
     channel-enabled="false">
 </c-dynamic-pricing-controller>
 ```
+
+### Pricing Control Room app
+- App Launcher → Pricing Control Room
+- Tabs: Dynamic Pricing Settings and Premium Appointment Settings
+- To place both LWCs on the app’s Home page: Home → Gear → Edit Page → drag `dynamicPricingController` and `premiumAppointmentController` onto the canvas → Save.
 
 ## Events
 
