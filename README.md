@@ -1,6 +1,6 @@
 # Premium Appointments & Dynamic Pricing (LWC + Apex)
 
-[![Deploy to Salesforce](https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png)](https://githubsfdeploy.herokuapp.com?owner=fizzy2562&repo=Dynamic-Premium-Pricing-LWC-&ref=feat/pricing-control-room-config)
+[![Deploy to Salesforce](https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png)](https://githubsfdeploy.herokuapp.com?owner=fizzy2562&repo=Dynamic-Premium-Pricing-LWC&ref=feat/pricing-control-room-config)
 
 Two Lightning Web Components backed by Apex controllers and two lightweight custom objects that let you manage premium appointments and dynamic pricing feature flags per scope (Business Unit, Territory, Account, Channel).
 
